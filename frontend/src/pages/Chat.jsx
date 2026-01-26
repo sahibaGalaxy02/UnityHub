@@ -1,20 +1,75 @@
+import { useEffect, useState } from "react";
+import { io } from "socket.io-client";
+
+const socket = io("http://localhost:5000");
+
 export default function Chat() {
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+
+  useEffect(() => {
+    // Listen for messages from server
+    socket.on("receiveMessage", (data) => {
+      setMessages((prev) => [
+        ...prev,
+        { sender: "bot", text: data }
+      ]);
+    });
+
+    return () => {
+      socket.off("receiveMessage");
+    };
+  }, []);
+
+  const sendMessage = () => {
+    if (!message.trim()) return;
+
+    // Show your message
+    setMessages((prev) => [
+      ...prev,
+      { sender: "you", text: message }
+    ]);
+
+    // Send to backend
+    socket.emit("sendMessage", message);
+
+    setMessage("");
+  };
+
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12 flex flex-col h-[70vh]">
-      <h2 className="text-2xl font-bold mb-4">Chat</h2>
+    <div className="min-h-screen flex justify-center items-center bg-gray-100">
+      <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-xl">
+        <h2 className="text-xl font-bold mb-4">Community Chat</h2>
 
-      <div className="flex-1 border rounded-lg p-4 overflow-y-auto mb-4">
-        <p className="text-gray-600">No messages yet</p>
-      </div>
+        <div className="border p-3 h-64 overflow-y-auto mb-4 rounded">
+          {messages.length === 0 && (
+            <p className="text-gray-400">No messages yet</p>
+          )}
 
-      <div className="flex gap-2">
-        <input
-          className="flex-1 border rounded-lg p-3"
-          placeholder="Type a message..."
-        />
-        <button className="bg-blue-600 text-white px-6 rounded-lg">
-          Send
-        </button>
+          {messages.map((msg, index) => (
+            <p key={index} className="mb-2">
+              <strong>
+                {msg.sender === "you" ? "You" : "UnityHub Bot"}:
+              </strong>{" "}
+              {msg.text}
+            </p>
+          ))}
+        </div>
+
+        <div className="flex gap-2">
+          <input
+            className="flex-1 border rounded px-3 py-2"
+            placeholder="Type your message..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+            onClick={sendMessage}
+          >
+            Send
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -1,19 +1,40 @@
-require("dotenv").config();
 const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
 const cors = require("cors");
-const connectDB = require("./config/db");
 
 const app = express();
-connectDB();
-
 app.use(cors());
-app.use(express.json());
 
-app.use("/api/auth", require("./routes/auth.routes"));
-app.use("/api/help", require("./routes/help.routes"));
-app.use("/api/donate", require("./routes/donate.routes"));
-app.use("/api/chat", require("./routes/chat.routes"));
+const server = http.createServer(app);
 
-app.listen(process.env.PORT, () => {
-  console.log("Backend running on port", process.env.PORT);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"]
+  }
 });
+
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+
+  socket.on("sendMessage", (msg) => {
+    console.log("Message received:", msg);
+
+    // Send bot response back
+    socket.emit(
+      "receiveMessage",
+      "Thanks for your message! A volunteer will respond soon ❤️"
+    );
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
+});
+
+server.listen(5000, () => {
+  console.log("Backend running on http://localhost:5000");
+});
+
+module.exports = app;
