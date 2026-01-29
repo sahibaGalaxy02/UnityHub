@@ -4,13 +4,16 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 
 const app = express();
-app.use(cors());
-
 const server = http.createServer(app);
+
+app.use(cors({
+  origin: process.env.CLIENT_URL || "*",
+  methods: ["GET", "POST"]
+}));
 
 const io = new Server(server, {
   cors: {
-    origin: "https://unity-hub-iza3.vercel.app",
+    origin: process.env.CLIENT_URL || "*",
     methods: ["GET", "POST"]
   }
 });
@@ -18,14 +21,13 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
-  socket.on("sendMessage", (msg) => {
-    console.log("Message received:", msg);
-
-    // Send bot response back
-    socket.emit(
-      "receiveMessage",
-      "Thanks for your message! A volunteer will respond soon ❤️"
-    );
+  socket.on("send_message", (data) => {
+    console.log("Message received:", data);
+    
+    socket.emit("receive_message", {
+      sender: "UnityHub Bot",
+      message: "Thanks for your message! A volunteer will respond soon ❤️"
+    });
   });
 
   socket.on("disconnect", () => {
@@ -33,8 +35,7 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(5000, () => {
-  console.log("Backend running on http://localhost:5000");
+const PORT = process.env.PORT || 10000;
+server.listen(PORT, () => {
+  console.log("Backend running on port", PORT);
 });
-
-module.exports = app;
