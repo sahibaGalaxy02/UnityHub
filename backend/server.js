@@ -26,7 +26,7 @@ io.on("connection", (socket) => {
     
     socket.emit("receive_message", {
       sender: "UnityHub Bot",
-      message: "Thanks for your message! A volunteer will respond soon ❤️"
+      message: "Thanks for your message! A volunteer will respond soon❤️"
     });
   });
 
