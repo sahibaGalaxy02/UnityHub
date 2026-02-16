@@ -1,5 +1,4 @@
-# 🌐 UnityHub — Community Help Platform
-
+# 🌐 UnityHub — Community Help Platform 
 UnityHubis a **full-stack web application** designed to connect people who need help with volunteers and donors. It provides a simple, clean interface for requesting help, making donations, and chatting with the community in real-time.
 
 
